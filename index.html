@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,87 +11,86 @@
             overflow: hidden;
             width: 100vw;
             height: 100vh;
-        }
-        .shape {
-            position: absolute;
             display: flex;
-            align-items: center;
             justify-content: center;
-            font-family: 'Arial', sans-serif;
-            font-weight: 900;
-            color: rgba(255, 255, 255, 0.9);
-            pointer-events: none;
-            border-radius: 10px; /* 약간 둥근 모서리 */
-            mix-blend-mode: screen; /* 빛이 겹치는 효과 */
+            align-items: center;
         }
-        #guide {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: rgba(255, 255, 255, 0.5);
-            font-family: sans-serif;
-            font-size: 18px;
+        .shard {
+            position: absolute;
+            border: 2px solid white;
             pointer-events: none;
-            letter-spacing: 2px;
+            mix-blend-mode: screen;
         }
     </style>
 </head>
 <body>
 
-    <div id="guide">MOVE MOUSE</div>
-
     <script>
-        let rotationValue = 0;
-        let globalCount = 0;
+        let rotation = 0;
+        let count = 0;
+        const symmetry = 6;
 
         document.addEventListener('mousemove', function(e) {
-            document.getElementById('guide').style.display = 'none';
+            count++;
+            if (count % 2 !== 0) return;
 
-            globalCount = globalCount + 1;
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
             
-            if (globalCount % 2 !== 0) return;
+            const dx = e.clientX - centerX;
+            const dy = e.clientY - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx);
 
-            const artElement = document.createElement('div');
-            artElement.className = 'shape';
+            for (let i = 0; i < symmetry; i++) {
+                const shard = document.createElement('div');
+                shard.className = 'shard';
 
-            let baseSize = 100 + (Math.random() * 150);
-            artElement.style.width = baseSize + "px";
-            artElement.style.height = baseSize + "px";
+                let size = 30 + (distance / 4);
+                shard.style.width = size + "px";
+                shard.style.height = size + "px";
 
-            let currentHue = (globalCount * 8) % 360;
-            let neonColor = "hsl(" + currentHue + ", 90%, 60%)";
-            
-            artElement.style.border = "2px solid " + neonColor;
-            
-            artElement.style.boxShadow = "0 0 15px " + neonColor + ", inset 0 0 10px " + neonColor;
-            
-            artElement.style.top = (e.clientY - baseSize / 2) + "px";
-            artElement.style.left = (e.clientX - baseSize / 2) + "px";
+                let hue = (angle * 180 / Math.PI + (i * (360 / symmetry))) % 360;
+                let color = "hsl(" + hue + ", 90%, 65%)";
+                shard.style.borderColor = color;
+                shard.style.boxShadow = "0 0 25px " + color;
 
-            artElement.innerText = globalCount;
-            artElement.style.fontSize = (baseSize / 6) + "px";
+                const currentAngle = angle + (i * (Math.PI * 2 / symmetry));
+                const posX = centerX + Math.cos(currentAngle) * distance;
+                const posY = centerY + Math.sin(currentAngle) * distance;
 
-            document.body.appendChild(artElement);
+                shard.style.left = (posX - size / 2) + "px";
+                shard.style.top = (posY - size / 2) + "px";
+                
+                shard.innerText = (i + 1).toString(16).toUpperCase();
+                shard.style.color = color;
+                shard.style.fontSize = "12px";
+                shard.style.fontFamily = "monospace";
+                shard.style.display = "flex";
+                shard.style.alignItems = "center";
+                shard.style.justifyContent = "center";
 
-            const allElements = document.querySelectorAll('.shape');
-            if (allElements.length > 15) {
-                allElements[0].remove();
+                document.body.appendChild(shard);
+
+                const shards = document.querySelectorAll('.shard');
+                if (shards.length > 54) {
+                    shards[0].remove();
+                }
             }
         });
 
-        function play() {
-            requestAnimationFrame(play);
-            rotationValue = rotationValue + 1.5;
+        function animate() {
+            requestAnimationFrame(animate);
+            rotation += 2.5;
 
-            const activeElements = document.querySelectorAll('.shape');
-            activeElements.forEach(function(item) {
-                let pulse = 1 + Math.sin(rotationValue * 0.04) * 0.15;
-                item.style.transform = "rotate(" + rotationValue + "deg) scale(" + pulse + ")";
+            const elements = document.querySelectorAll('.shard');
+            elements.forEach(function(el, index) {
+                let pulse = 1 + Math.sin(rotation * 0.06 + index) * 0.25;
+                el.style.transform = "rotate(" + (rotation + index * 12) + "deg) scale(" + pulse + ")";
             });
         }
 
-        play();
+        animate();
     </script>
 </body>
 </html>
