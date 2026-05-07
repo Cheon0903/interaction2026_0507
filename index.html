@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+        .shape {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Arial', sans-serif;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.9);
+            pointer-events: none;
+            border-radius: 10px; /* 약간 둥근 모서리 */
+            mix-blend-mode: screen; /* 빛이 겹치는 효과 */
+        }
+        #guide {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-family: sans-serif;
+            font-size: 18px;
+            pointer-events: none;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="guide">MOVE MOUSE</div>
+
+    <script>
+        let rotationValue = 0;
+        let globalCount = 0;
+
+        document.addEventListener('mousemove', function(e) {
+            document.getElementById('guide').style.display = 'none';
+
+            globalCount = globalCount + 1;
+            
+            if (globalCount % 2 !== 0) return;
+
+            const artElement = document.createElement('div');
+            artElement.className = 'shape';
+
+            let baseSize = 100 + (Math.random() * 150);
+            artElement.style.width = baseSize + "px";
+            artElement.style.height = baseSize + "px";
+
+            let currentHue = (globalCount * 8) % 360;
+            let neonColor = "hsl(" + currentHue + ", 90%, 60%)";
+            
+            artElement.style.border = "2px solid " + neonColor;
+            
+            artElement.style.boxShadow = "0 0 15px " + neonColor + ", inset 0 0 10px " + neonColor;
+            
+            artElement.style.top = (e.clientY - baseSize / 2) + "px";
+            artElement.style.left = (e.clientX - baseSize / 2) + "px";
+
+            artElement.innerText = globalCount;
+            artElement.style.fontSize = (baseSize / 6) + "px";
+
+            document.body.appendChild(artElement);
+
+            const allElements = document.querySelectorAll('.shape');
+            if (allElements.length > 15) {
+                allElements[0].remove();
+            }
+        });
+
+        function play() {
+            requestAnimationFrame(play);
+            rotationValue = rotationValue + 1.5;
+
+            const activeElements = document.querySelectorAll('.shape');
+            activeElements.forEach(function(item) {
+                let pulse = 1 + Math.sin(rotationValue * 0.04) * 0.15;
+                item.style.transform = "rotate(" + rotationValue + "deg) scale(" + pulse + ")";
+            });
+        }
+
+        play();
+    </script>
+</body>
+</html>
